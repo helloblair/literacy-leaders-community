@@ -1,3 +1,8 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = []
+from .views import DistrictViewSet
+
+router = DefaultRouter()
+router.register(r"", DistrictViewSet, basename="district")
+
+urlpatterns = router.urls
