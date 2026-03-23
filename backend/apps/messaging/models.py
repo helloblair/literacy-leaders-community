@@ -1,2 +1,38 @@
-# messaging models
+from django.conf import settings
 from django.db import models
+
+
+class Conversation(models.Model):
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="conversations"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        names = ", ".join(str(p) for p in self.participants.all()[:3])
+        return f"Conversation: {names}"
+
+
+class Message(models.Model):
+    conversation = models.ForeignKey(
+        Conversation, on_delete=models.CASCADE, related_name="messages"
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages"
+    )
+    content = models.TextField()
+    is_moderation = models.BooleanField(default=False)
+    read_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, blank=True, related_name="read_messages"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.sender}: {self.content[:50]}"
