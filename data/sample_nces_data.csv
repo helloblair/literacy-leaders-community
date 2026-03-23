@@ -1,0 +1,21 @@
+nces_id,name,state,locale_code,enrollment,frl_percentage,ell_percentage
+0100005,Albertville City,AL,13,6012,52.30,4.20
+0100007,Hoover City,AL,21,14283,18.50,6.10
+0600006,Los Angeles Unified,CA,11,596937,72.10,19.80
+0600014,San Diego Unified,CA,11,104461,60.40,22.30
+0600019,Oakland Unified,CA,11,49185,75.60,31.50
+0600024,Fresno Unified,CA,13,71935,82.30,18.70
+0600027,Long Beach Unified,CA,12,69563,68.90,25.40
+1700099,Chicago Public Schools,IL,11,323323,77.50,16.90
+1700108,Rockford Public Schools,IL,13,28204,66.20,12.40
+1700114,Peoria Public Schools,IL,13,14076,74.80,7.60
+2500004,Boston Public Schools,MA,11,52736,70.20,28.60
+2500013,Springfield Public Schools,MA,13,24823,79.40,22.10
+3600004,New York City Department of Education,NY,11,1008906,73.80,14.20
+3600010,Buffalo City School District,NY,12,31827,80.10,9.30
+3600015,Rochester City School District,NY,11,27254,84.60,11.80
+4800001,Houston Independent School District,TX,11,194303,78.30,30.20
+4800004,Dallas Independent School District,TX,11,143801,80.10,35.70
+4800007,Austin Independent School District,TX,12,80716,55.40,26.30
+4800011,Fort Worth Independent School District,TX,12,86631,73.60,28.90
+4800016,Laredo Independent School District,TX,31,24509,91.20,55.30
