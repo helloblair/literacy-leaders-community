@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Community from "./pages/Community";
 import Messages from "./pages/Messages";
+import Moderation from "./pages/Moderation";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -52,6 +53,15 @@ function Navbar() {
                 <NavLink to="/community" className={linkClass}>Community</NavLink>
                 <NavLink to="/messages" className={linkClass}>Messages</NavLink>
                 <NavLink to="/profile" className={linkClass}>Profile</NavLink>
+                {["moderator", "admin"].includes(user.role) && (
+                  <NavLink to="/moderation" className={({ isActive }) =>
+                    `px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                      isActive
+                        ? "bg-amber-100 text-amber-800"
+                        : "text-amber-500 hover:text-amber-700 hover:bg-amber-50"
+                    }`
+                  }>Moderation</NavLink>
+                )}
                 <button onClick={handleLogout} className="px-3 py-2 rounded-lg text-sm font-semibold text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all ml-1">
                   Logout
                 </button>
@@ -84,6 +94,7 @@ function AppRoutes() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+          <Route path="/moderation" element={<ProtectedRoute><Moderation /></ProtectedRoute>} />
         </Routes>
       </main>
       <footer className="border-t border-gray-100 mt-16">
