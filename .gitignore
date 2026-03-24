@@ -21,6 +21,7 @@ dist/
 # IDE
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 
@@ -31,3 +32,4 @@ Thumbs.db
 # Database
 *.sqlite3
 DEMO_SCRIPT.md
+docs/
