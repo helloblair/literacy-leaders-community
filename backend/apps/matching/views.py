@@ -75,6 +75,10 @@ class FindMatchesView(APIView):
         if locale_type:
             candidates = candidates.filter(district__locale_type__iexact=locale_type)
 
+        user_enrollment = user.district.enrollment or 0
+        user_frl = float(user.district.frl_percentage or 0)
+        user_ell = float(user.district.ell_percentage or 0)
+
         results = []
         for candidate in candidates:
             candidate_ps_ids = set(
@@ -89,11 +93,32 @@ class FindMatchesView(APIView):
             )
             same_state = candidate.district.state == user.district.state
 
+            # Enrollment similarity: ratio of smaller/larger, scaled to 0-1.5
+            cand_enrollment = candidate.district.enrollment or 0
+            if user_enrollment and cand_enrollment:
+                enrollment_ratio = min(user_enrollment, cand_enrollment) / max(user_enrollment, cand_enrollment)
+            else:
+                enrollment_ratio = 0
+            enrollment_score = enrollment_ratio * 1.5
+
+            # FRL similarity: 1 - (difference / 100), scaled to 0-1.0
+            cand_frl = float(candidate.district.frl_percentage or 0)
+            frl_diff = abs(user_frl - cand_frl)
+            frl_score = (1 - frl_diff / 100) * 1.0
+
+            # ELL similarity: 1 - (difference / 100), scaled to 0-1.0
+            cand_ell = float(candidate.district.ell_percentage or 0)
+            ell_diff = abs(user_ell - cand_ell)
+            ell_score = (1 - ell_diff / 100) * 1.0
+
             score = shared * 3.0
             if same_locale:
                 score += 1.0
             if same_state:
                 score += 0.5
+            score += enrollment_score
+            score += frl_score
+            score += ell_score
 
             results.append(
                 {
@@ -101,7 +126,10 @@ class FindMatchesView(APIView):
                     "shared_problem_statements": shared,
                     "same_locale": same_locale,
                     "same_state": same_state,
-                    "match_score": score,
+                    "enrollment_similarity": round(enrollment_ratio, 2),
+                    "frl_similarity": round(1 - frl_diff / 100, 2),
+                    "ell_similarity": round(1 - ell_diff / 100, 2),
+                    "match_score": round(score, 2),
                 }
             )
 

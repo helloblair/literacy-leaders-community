@@ -24,4 +24,7 @@ class MatchResultSerializer(serializers.Serializer):
     shared_problem_statements = serializers.IntegerField()
     same_locale = serializers.BooleanField()
     same_state = serializers.BooleanField()
+    enrollment_similarity = serializers.FloatField()
+    frl_similarity = serializers.FloatField()
+    ell_similarity = serializers.FloatField()
     match_score = serializers.FloatField()
