@@ -15,10 +15,11 @@ export default function Community() {
   const [stateFilter, setStateFilter] = useState("");
   const [localeFilter, setLocaleFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("match_score");
 
   useEffect(() => {
     fetchData();
-  }, [mode, stateFilter, localeFilter]);
+  }, [mode, stateFilter, localeFilter, sortBy]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -30,7 +31,21 @@ export default function Community() {
 
       const endpoint = mode === "matches" ? "/matching/find/" : "/matching/directory/";
       const res = await client.get(endpoint, { params });
-      setMembers(res.data);
+      const data = res.data;
+
+      // Client-side sort
+      if (mode === "matches" && sortBy) {
+        data.sort((a, b) => {
+          if (sortBy === "match_score") return (b.match_score || 0) - (a.match_score || 0);
+          if (sortBy === "shared") return (b.shared_problem_statements || 0) - (a.shared_problem_statements || 0);
+          if (sortBy === "enrollment") return (b.user?.district_detail?.enrollment || 0) - (a.user?.district_detail?.enrollment || 0);
+          return 0;
+        });
+      } else if (mode === "directory" && sortBy === "enrollment") {
+        data.sort((a, b) => (b.district_detail?.enrollment || 0) - (a.district_detail?.enrollment || 0));
+      }
+
+      setMembers(data);
     } catch (err) {
       if (err.response?.status === 400) {
         setMembers([]);
@@ -67,9 +82,14 @@ export default function Community() {
             {member.title && <p className="text-xs text-gray-400">{member.title}</p>}
           </div>
           {mode === "matches" && (
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-100 text-brand-700">
-              {item.shared_problem_statements} shared
-            </span>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-100 text-brand-700">
+                {item.shared_problem_statements} shared
+              </span>
+              <span className="text-[10px] text-gray-400 font-medium">
+                score: {item.match_score}
+              </span>
+            </div>
           )}
         </div>
         {member.district_detail && (
@@ -139,6 +159,14 @@ export default function Community() {
             <select value={localeFilter} onChange={(e) => setLocaleFilter(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-300 outline-none transition-all">
               <option value="">All Locales</option>
               {LOCALE_TYPES.map((l) => <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>)}
+            </select>
+          </div>
+          <div className="min-w-[160px]">
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Sort By</label>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-300 outline-none transition-all">
+              <option value="match_score">Match Score</option>
+              <option value="shared">Shared Statements</option>
+              <option value="enrollment">District Size</option>
             </select>
           </div>
         </div>
