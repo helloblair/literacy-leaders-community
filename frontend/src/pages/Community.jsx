@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import client from "../api/client";
 
@@ -9,13 +9,16 @@ const LOCALE_TYPES = ["urban", "suburban", "town", "rural"];
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState("directory");
+  const location = useLocation();
+  const mode = location.pathname === "/community/matches" ? "matches" : "directory";
+
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stateFilter, setStateFilter] = useState("");
   const [localeFilter, setLocaleFilter] = useState("");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("match_score");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -23,6 +26,8 @@ export default function Community() {
 
   const fetchData = async () => {
     setLoading(true);
+    setError("");
+    setMembers([]);
     try {
       const params = {};
       if (stateFilter) params.state = stateFilter;
@@ -47,8 +52,9 @@ export default function Community() {
 
       setMembers(data);
     } catch (err) {
+      setMembers([]);
       if (err.response?.status === 400) {
-        setMembers([]);
+        setError(err.response.data?.detail || "Update your profile with a district and problem statements to find matches.");
       }
     } finally {
       setLoading(false);
@@ -72,10 +78,11 @@ export default function Community() {
     return styles[locale] || "bg-gray-50 text-gray-700";
   };
 
-  const renderMember = (item) => {
+  const renderMember = (item, key) => {
     const member = mode === "matches" ? item.user : item;
+    if (!member) return null;
     return (
-      <div key={member.id} className="group bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-lg hover:border-brand-100 hover:-translate-y-0.5 transition-all duration-200">
+      <div key={key} className="group bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-lg hover:border-brand-100 hover:-translate-y-0.5 transition-all duration-200">
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="font-semibold text-gray-900">{member.first_name} {member.last_name}</h3>
@@ -127,14 +134,14 @@ export default function Community() {
 
       {/* Mode toggle */}
       <div className="flex gap-2 mb-6">
-        <button onClick={() => setMode("directory")}
+        <Link to="/community"
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${mode === "directory" ? "bg-brand-100 text-brand-800" : "text-gray-500 hover:bg-gray-100"}`}>
           All Members
-        </button>
-        <button onClick={() => setMode("matches")}
+        </Link>
+        <Link to="/community/matches"
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${mode === "matches" ? "bg-brand-100 text-brand-800" : "text-gray-500 hover:bg-gray-100"}`}>
           My Matches
-        </button>
+        </Link>
       </div>
 
       {/* Filters */}
@@ -177,6 +184,10 @@ export default function Community() {
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
         </div>
+      ) : error ? (
+        <div className="text-center py-20">
+          <p className="text-gray-400 text-lg">{error}</p>
+        </div>
       ) : members.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-gray-400 text-lg">
@@ -185,7 +196,11 @@ export default function Community() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {members.map(renderMember)}
+          {members.map((item) => {
+            const member = mode === "matches" ? item.user : item;
+            if (!member) return null;
+            return renderMember(item, member.id);
+          })}
         </div>
       )}
     </div>
