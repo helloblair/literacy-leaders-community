@@ -15,7 +15,7 @@ class CommunityDirectoryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        qs = User.objects.filter(is_active=True).exclude(id=request.user.id)
+        qs = User.objects.filter(is_active=True, district__isnull=False).exclude(id=request.user.id)
         qs = qs.select_related("district").prefetch_related("problem_statements")
 
         # Filters
