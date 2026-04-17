@@ -1,5 +1,6 @@
-import { Routes, Route, NavLink, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, NavLink, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import Landing from "./pages/Landing";
 import DistrictExplorer from "./pages/DistrictExplorer";
 import TaxonomyBrowser from "./pages/TaxonomyBrowser";
 import Login from "./pages/Login";
@@ -38,7 +39,10 @@ function Navbar() {
         <div className="flex items-center justify-between h-16">
           <NavLink to="/" className="flex items-center gap-3 group">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md shadow-brand-200 group-hover:shadow-lg group-hover:shadow-brand-300 transition-shadow">
-              <span className="text-white font-display font-extrabold text-sm">LL</span>
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
             </div>
             <div className="hidden sm:block">
               <span className="font-display font-bold text-gray-900">Literacy Leaders</span>
@@ -46,7 +50,7 @@ function Navbar() {
             </div>
           </NavLink>
           <div className="flex items-center gap-1">
-            <NavLink to="/" className={linkClass} end>Districts</NavLink>
+            <NavLink to="/districts" className={linkClass}>Districts</NavLink>
             <NavLink to="/taxonomy" className={linkClass}>Taxonomy</NavLink>
             {user ? (
               <>
@@ -82,26 +86,33 @@ function Navbar() {
 }
 
 function AppRoutes() {
+  const location = useLocation();
+  const isLanding = location.pathname === "/";
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {!isLanding && <Navbar />}
+      <main className={isLanding ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"}>
         <Routes>
-          <Route path="/" element={<DistrictExplorer />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/districts" element={<DistrictExplorer />} />
           <Route path="/taxonomy" element={<TaxonomyBrowser />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+          <Route path="/community/matches" element={<ProtectedRoute><Community /></ProtectedRoute>} />
           <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
           <Route path="/moderation" element={<ProtectedRoute><Moderation /></ProtectedRoute>} />
         </Routes>
       </main>
-      <footer className="border-t border-gray-100 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-gray-400">
-          Literacy Leaders Community &mdash; Connecting districts for educational equity
-        </div>
-      </footer>
+      {!isLanding && (
+        <footer className="border-t border-gray-100 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-gray-400">
+            Literacy Leaders Community &mdash; Connecting districts for educational equity
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
